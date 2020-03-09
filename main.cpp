@@ -2,6 +2,7 @@
    Works Cited:
      Reused input and parse method from my previous Heap code
      Binarty insertion from http://www.cplusplus.com/forum/general/166384/
+     BTS print: https://www.techiedelight.com/c-program-print-binary-tree/
 */
 
 #include <iostream>
@@ -19,11 +20,33 @@ struct node {
   node* right;
 };
 
+struct Trunk {
+  Trunk *prev;
+  char str[10];
+  
+  Trunk(Trunk *prev, char str[10])
+  {
+    this->prev = prev;
+    strcpy(str, this->str);
+  }
+};
+
+// Helper function to print branches of the binary tree
+void showTrunks(Trunk *p)
+{
+    if (p == nullptr)
+        return;
+
+    showTrunks(p->prev);
+    
+    cout << p->str;
+}
+
 //functions
 void parse(char* in, int* modif, int &count);
-void buildTree(int* modif, node* head, int size);
+void buildTree(int* modif, node** head, int size);
 void insert(node** curr, int val);
-void PrintInOrder(node** curr);
+void printTree(node *root, Trunk *prev, bool isLeft);
 
 
 int main() {
@@ -104,9 +127,34 @@ int main() {
       }
       //create tree
       node* head = NULL;
-      buildTree(modif, head, siz);
+      buildTree(modif, &head, siz);
       cout << "========Tree=Built=======" << endl;
-      PrintInOrder(&head);
+      cout << head->data << endl;
+      cout << (head->left)->data << endl;
+      cout << (head->right)->data << endl;
+      // print constructed binary tree
+      cout << endl;
+      printTree(head, nullptr, false);
+      cout << "======Work=in=Tree=======" << endl;
+      bool r = true;
+      char resp[10];
+      while (r) {
+	cout << "YOu can: search, remove, or done:" << endl;
+	cin.get(resp, 10);
+	cin.clear();
+	cin.ignore(10000, '\n');
+	if (strcmp(resp, "search") == 0) {
+	  
+	} else if (strcmp(resp, "remove") == 0) {
+	  
+	} else if (strcmp(resp, "done") == 0) {
+	  cout << endl << "Discarded current heap." << endl;
+	  r = false;
+	  cout << "=========================" << endl;
+	} else {
+	  cout << endl << "Invalid operation. Try again." << endl;
+	}
+      }
     }
     else if (strcmp(inp, "quit") == 0) {
       cout << endl << "Thank you for using my program!" << endl;
@@ -153,10 +201,10 @@ void parse(char* in, int* modif, int &count) {
   } 
 }
 
-void buildTree(int* modif, node* head, int size) {
+void buildTree(int* modif, node** head, int size) {
   for (int i = 0; i < size; i++) {
-    insert(&head, modif[i]);
-    //cout << "inserted " << modif[i] << endl;
+    insert(head, modif[i]);
+    cout << "inserted " << modif[i] << endl;
   }
 }
 
@@ -165,7 +213,7 @@ void insert(node** curr, int val) {
   node* current = NULL;
   if (*curr == nullptr) {
     *curr = new node;
-    (*curr)->left = (*curr)->right = nullptr;
+    (*curr)->left = (*curr)->right = NULL;
     (*curr)->data = val;
   }
   else if (val <= (*curr)->data) {  //lower goes left
@@ -178,10 +226,37 @@ void insert(node** curr, int val) {
   }
 }
 
-void PrintInOrder(node** curr) { 
-  if (*curr == nullptr) { 
-    PrintInOrder(&(*curr)->left); 
-    cout << (*curr)->data << endl; 
-    PrintInOrder(&(*curr)->right); 
-  } 
-} 
+//https://www.techiedelight.com/c-program-print-binary-tree/
+// Recursive function to print binary tree
+// It uses inorder traversal
+void printTree(node *root, Trunk *prev, bool isLeft) {
+  if (root == nullptr) {
+       return;
+  }
+  char prev_str[10];
+  strcpy(prev_str, "    ");
+  Trunk *trunk = new Trunk(prev, prev_str);
+    
+  printTree(root->left, trunk, true);
+  
+  if (!prev) {
+    strcpy(trunk->str, "---");
+  }
+  else if (isLeft) {
+    strcpy(trunk->str, ".---");
+    strcpy(prev_str, "   |");
+  }
+  else {
+    strcpy(trunk->str, "`---");
+    strcpy(prev_str, prev->str);
+  }
+  showTrunks(trunk);
+  cout << root->data << endl;
+  
+  if (prev) {
+    strcpy(prev_str, prev->str);
+  }
+  strcpy(trunk->str, "   |");
+  
+  printTree(root->right, trunk, false);
+}

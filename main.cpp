@@ -9,23 +9,23 @@
 #include <cstring>
 #include <iomanip>
 #include <fstream>
-//#include "node.h"
+
+#include "node.h"
 
 using namespace std;
 
 //node struct
-struct node {
+/*struct node {
   int data;
   node* left;
   node* right;
-};
+}; */
 
 struct Trunk {
   Trunk *prev;
   char str[10];
   
-  Trunk(Trunk *prev, char str[10])
-  {
+  Trunk(Trunk *prev, char str[10]) {
     this->prev = prev;
     strcpy(str, this->str);
   }
@@ -34,19 +34,17 @@ struct Trunk {
 // Helper function to print branches of the binary tree
 void showTrunks(Trunk *p)
 {
-    if (p == nullptr)
-        return;
-
-    showTrunks(p->prev);
-    
-    cout << p->str;
+  if (p == nullptr) {
+    return;
+  }
+  showTrunks(p->prev);
+  cout << p->str;
 }
 
 //functions
 void parse(char* in, int* modif, int &count);
-void buildTree(int* modif, node** head, int size);
-void insert(node** curr, int val);
-void printTree(node *root, Trunk *prev, bool isLeft);
+void insert(Node* &head, int val);
+void printTree(Node *root, Trunk *prev, bool isLeft);
 
 
 int main() {
@@ -56,6 +54,7 @@ int main() {
   char input[10000];
   int count = 0;  //number of chars
   int modif[100];
+  int siz = 0; //for modif array size
   for (int i = 0; i < 100; i++) {
     modif[i] = 0;  //clear int array
   }
@@ -78,7 +77,9 @@ int main() {
       cin.get(inp, 10);
       cin.clear();
       cin.ignore(10000, '\n');
+      bool tr = false;
       if (strcmp(inp, "file") == 0) {
+	tr = true;
 	//Credit Omar Nassar's Heap project for file input code
 	cout << endl << "What is the name of the file?" << endl << ">> ";
 	cin.get(fileName, 30);
@@ -101,6 +102,7 @@ int main() {
 	}
       }
       else if (strcmp(inp, "type") == 0) {
+	tr = true;
 	cout << "Enter numbers separated by space:" << endl;
 	char in[10000];
 	cin.get(in, 10000);
@@ -112,47 +114,44 @@ int main() {
 	for (int i = 0; i < 100; i++) {
 	  if (modif[i] == 0) break;
 	  cout << modif[i] << " ";
+	  siz++;
 	}
-	cout << endl;      
+	cout << endl << " Size: " << siz << endl;      
       }
       else {
+	tr = false;
 	cout << "No such input method. Try again." << endl;
       }
-      //get size of modif array
-      int siz = 0;
-      for (int i = 0; i < 100; i++) {
-	if(modif[i] != 0) {
-	  siz++;
-	} else break;
-      }
-      //create tree
-      node* head = NULL;
-      buildTree(modif, &head, siz);
-      cout << "========Tree=Built=======" << endl;
-      cout << head->data << endl;
-      cout << (head->left)->data << endl;
-      cout << (head->right)->data << endl;
-      // print constructed binary tree
-      cout << endl;
-      printTree(head, nullptr, false);
-      cout << "======Work=in=Tree=======" << endl;
-      bool r = true;
-      char resp[10];
-      while (r) {
-	cout << "YOu can: search, remove, or done:" << endl;
-	cin.get(resp, 10);
-	cin.clear();
-	cin.ignore(10000, '\n');
-	if (strcmp(resp, "search") == 0) {
-	  
-	} else if (strcmp(resp, "remove") == 0) {
-	  
-	} else if (strcmp(resp, "done") == 0) {
-	  cout << endl << "Discarded current heap." << endl;
-	  r = false;
-	  cout << "=========================" << endl;
-	} else {
-	  cout << endl << "Invalid operation. Try again." << endl;
+      if (tr) {
+	//create tree
+	Node* head = new Node();
+	for (int i = 0; i < siz; i++) {
+	  cout << " will do " << modif[i] << endl;;
+	  insert(head, modif[i]);
+	  cout << "inserted " << modif[i] << endl;
+	}
+	cout << "========Tree=Built=======" << endl;
+	// print constructed binary tree
+	printTree(head, nullptr, false);
+	cout << "======Work=in=Tree=======" << endl;
+	bool r = true;
+	char resp[10];
+	while (r) {
+	  cout << "You can: search, remove, or done:" << endl;
+	  cin.get(resp, 10);
+	  cin.clear();
+	  cin.ignore(10000, '\n');
+	  if (strcmp(resp, "search") == 0) {
+	    
+	  } else if (strcmp(resp, "remove") == 0) {
+	    
+	  } else if (strcmp(resp, "done") == 0) {
+	    cout << endl << "Discarded current heap." << endl;
+	    r = false;
+	    cout << "=========================" << endl;
+	  } else {
+	    cout << endl << "Invalid operation. Try again." << endl;
+	  }
 	}
       }
     }
@@ -201,35 +200,47 @@ void parse(char* in, int* modif, int &count) {
   } 
 }
 
-void buildTree(int* modif, node** head, int size) {
-  for (int i = 0; i < size; i++) {
-    insert(head, modif[i]);
-    cout << "inserted " << modif[i] << endl;
+//insert function from GeeksforGeeks
+void insert(Node* &head, int val) {
+  Node* curr = head;
+  if (*curr->getData() == 0 || curr == NULL) {
+    cout << "in " << val << endl;
+    curr->setData(val);
+  }
+  else if (val <= *curr->getData()) {
+    curr = curr->getLeft();
+    insert(curr, val);
+  }
+  else {
+    curr = curr->getRight();
+    insert(curr, val);
   }
 }
 
-//insert function from GeeksforGeeks
-void insert(node** curr, int val) { 
-  node* current = NULL;
+/*void insert(node** curr, int val) { 
+  node* current = new node;
   if (*curr == nullptr) {
     *curr = new node;
     (*curr)->left = (*curr)->right = NULL;
     (*curr)->data = val;
+    cout << "  of val " << val << endl;
   }
   else if (val <= (*curr)->data) {  //lower goes left
     current = (*curr)->left;
+    cout << " left" << endl;
     insert(&current, val);
   }
   else {  //higher goes right 
     current = (*curr)->right;
+    cout << " right" << endl;
     insert(&current, val);
   }
-}
+}*/
 
 //https://www.techiedelight.com/c-program-print-binary-tree/
 // Recursive function to print binary tree
 // It uses inorder traversal
-void printTree(node *root, Trunk *prev, bool isLeft) {
+void printTree(Node *root, Trunk *prev, bool isLeft) {
   if (root == nullptr) {
        return;
   }
@@ -237,7 +248,7 @@ void printTree(node *root, Trunk *prev, bool isLeft) {
   strcpy(prev_str, "    ");
   Trunk *trunk = new Trunk(prev, prev_str);
     
-  printTree(root->left, trunk, true);
+  printTree(root->getLeft(), trunk, true);
   
   if (!prev) {
     strcpy(trunk->str, "---");
@@ -251,12 +262,12 @@ void printTree(node *root, Trunk *prev, bool isLeft) {
     strcpy(prev_str, prev->str);
   }
   showTrunks(trunk);
-  cout << root->data << endl;
+  cout << *root->getData() << endl;
   
   if (prev) {
     strcpy(prev_str, prev->str);
   }
   strcpy(trunk->str, "   |");
   
-  printTree(root->right, trunk, false);
+  printTree(root->getRight(), trunk, false);
 }

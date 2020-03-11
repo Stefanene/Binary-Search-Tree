@@ -43,7 +43,7 @@ void showTrunks(Trunk *p)
 
 //functions
 void parse(char* in, int* modif, int &count);
-void insert(Node* &head, int val);
+void insert(Node* &head, Node* &curr, Node* &prev, int val);
 void printTree(Node *root, Trunk *prev, bool isLeft);
 
 
@@ -124,11 +124,12 @@ int main() {
       }
       if (tr) {
 	//create tree
-	Node* head = new Node();
+	Node* head = NULL;  //tree root
+	Node* curr = NULL;  //current node
+	Node* prev = NULL;  //previous node
 	for (int i = 0; i < siz; i++) {
-	  cout << " will do " << modif[i] << endl;;
-	  insert(head, modif[i]);
-	  cout << "inserted " << modif[i] << endl;
+	  curr = head;
+	  insert(head, curr, prev, modif[i]);
 	}
 	cout << "========Tree=Built=======" << endl;
 	// print constructed binary tree
@@ -200,50 +201,41 @@ void parse(char* in, int* modif, int &count) {
   } 
 }
 
-//insert function from GeeksforGeeks
-void insert(Node* &head, int val) {
-  Node* curr = head;
-  if (*curr->getData() == 0 || curr == NULL) {
-    cout << "in " << val << endl;
-    curr->setData(val);
-  }
-  else if (val <= *curr->getData()) {
-    curr = curr->getLeft();
-    insert(curr, val);
-  }
-  else {
-    curr = curr->getRight();
-    insert(curr, val);
+//insert function
+void insert(Node* &head, Node* &curr, Node*& prev, int val) {
+  if (head == NULL) {
+    head = new Node();
+    head->setData(val);
+  } else {
+    if (val <= *curr->getData()) {  //lower goes left
+      prev = curr;
+      curr = curr->getLeft();
+      if (curr == NULL) {  //if empty then insert
+	curr = new Node();
+	curr->setData(val);
+	prev->setLeft(curr);
+      } else {  //if !empty then keep going
+	insert(head, curr, prev, val);
+      }
+    }
+    else {
+      prev = curr;
+      curr = curr->getRight();  //higer goes right
+      if (curr == NULL) {  //if empty then inset
+	curr = new Node();
+	curr->setData(val);
+	prev->setRight(curr);
+      } else {  //if !empty then keep going
+	insert(head, curr, prev, val);
+      }
+    }
   }
 }
-
-/*void insert(node** curr, int val) { 
-  node* current = new node;
-  if (*curr == nullptr) {
-    *curr = new node;
-    (*curr)->left = (*curr)->right = NULL;
-    (*curr)->data = val;
-    cout << "  of val " << val << endl;
-  }
-  else if (val <= (*curr)->data) {  //lower goes left
-    current = (*curr)->left;
-    cout << " left" << endl;
-    insert(&current, val);
-  }
-  else {  //higher goes right 
-    current = (*curr)->right;
-    cout << " right" << endl;
-    insert(&current, val);
-  }
-}*/
 
 //https://www.techiedelight.com/c-program-print-binary-tree/
 // Recursive function to print binary tree
 // It uses inorder traversal
 void printTree(Node *root, Trunk *prev, bool isLeft) {
-  if (root == nullptr) {
-       return;
-  }
   char prev_str[10];
   strcpy(prev_str, "    ");
   Trunk *trunk = new Trunk(prev, prev_str);

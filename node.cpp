@@ -13,7 +13,9 @@ Node::Node() {
 
 Node::~Node() {
   //destructor
-  delete this;
+  //delete &data;
+  left = NULL;
+  right = NULL;
 }
 
 //getters

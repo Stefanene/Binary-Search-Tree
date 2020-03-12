@@ -158,7 +158,7 @@ int main() {
 	    cin >> val;
 	    cin.clear();
 	    cin.ignore(10000, '\n');
-	    //head = remove(head, val);
+	    head = remove(head, val);
 	    cout << endl << val << " has been removed:" << endl;
 	    cout << endl;
 	    printTree(head, NULL, false);
@@ -313,4 +313,55 @@ Node* search(Node* curr, int val) {
   } 
 }
 
-
+//remove function with help from //www.geeksforgeeks.org/binary-search-tree-set-2-delete/
+Node* remove(Node* &root, int k) {  
+  if (root == NULL) {  //base case
+    return root; 
+  }
+  //recursive calls
+  if (*root->getData() > k) {
+    Node* l = root->getLeft();
+    root->setLeft(remove(l, k)); 
+    return root; 
+  } 
+  else if (*root->getData() < k) {
+    Node* r = root->getRight();
+    root->setRight(remove(r, k)); 
+    return root; 
+  }
+  //if one child is empty
+  if (root->getLeft() == NULL) {  //left null, go right
+    Node* temp = root->getRight(); 
+    root->~Node();  //delete root
+    root = NULL;
+    return temp; 
+  } 
+  else if (root->getRight() == NULL) {  //right null, go left
+    Node* temp = root->getLeft(); 
+    root->~Node();  //delete root
+    root = NULL;
+    return temp; 
+  } 
+  //if both children exist 
+  else { 
+    Node* succParent = root->getRight(); 
+    
+    // Find successor 
+    Node *succ = root->getRight(); 
+    while (succ->getLeft() != NULL) { 
+      succParent = succ; 
+      succ = succ->getLeft(); 
+    } 
+    
+    //successors right child becomes parent's left child 
+    succParent->setLeft(succ->getRight()); 
+    
+    //copy successor data to root 
+    root->setData(*succ->getData()); 
+    
+    //delete Successor and return root
+    succ->~Node();
+    succ = NULL;
+    return root; 
+  } 
+} 

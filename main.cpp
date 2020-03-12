@@ -1,8 +1,9 @@
 /* Binary Search by Stefan Ene
    Works Cited:
      Reused input and parse method from my previous Heap code
-     Binarty insertion from http://www.cplusplus.com/forum/general/166384/
-     BTS print: https://www.techiedelight.com/c-program-print-binary-tree/
+     Visual tree printing from //www.techiedelight.com/c-program-print-binary-tree/
+       ^ includes Trunk struct and showTrunk function
+     Remove function references from www.geeksforgeeks.org/binary-search-tree-set-2-delete/
 */
 
 #include <iostream>
@@ -14,38 +15,32 @@
 
 using namespace std;
 
-//node struct
-/*struct node {
-  int data;
-  node* left;
-  node* right;
-}; */
-
+//struct Trunk for print method
 struct Trunk {
   Trunk *prev;
-  char str[10];
-  
-  Trunk(Trunk *prev, char str[10]) {
-    this->prev = prev;
-    strcpy(str, this->str);
+  char* str;
+
+  Trunk(Trunk *prev, char* str) {
+    this -> prev = prev;
+    this -> str = str;
   }
 };
 
-// Helper function to print branches of the binary tree
-void showTrunks(Trunk *p)
-{
-  if (p == nullptr) {
+void showTrunks(Trunk *p) {//helper method for printing
+  if (p == NULL)
     return;
-  }
-  showTrunks(p->prev);
-  cout << p->str;
+
+  showTrunks(p -> prev);
+
+  cout << p -> str;
 }
 
 //functions
 void parse(char* in, int* modif, int &count);
 void insert(Node* &head, Node* &curr, Node* &prev, int val);
-void printTree(Node *root, Trunk *prev, bool isLeft);
-
+void printTree(Node* root, Trunk *prev, bool isLeft);
+Node* search (Node* curr, int val);
+Node* remove (Node* &root, int k);
 
 int main() {
   //variables
@@ -130,24 +125,60 @@ int main() {
 	for (int i = 0; i < siz; i++) {
 	  curr = head;
 	  insert(head, curr, prev, modif[i]);
+	  cout << modif[i] << endl;
 	}
 	cout << "========Tree=Built=======" << endl;
 	// print constructed binary tree
-	printTree(head, nullptr, false);
+	cout << endl;
+	printTree(head, NULL, false);
+	cout << endl;
 	cout << "======Work=in=Tree=======" << endl;
 	bool r = true;
 	char resp[10];
 	while (r) {
-	  cout << "You can: search, remove, or done:" << endl;
+	  cout << endl << "You can: search, add, remove, or done:" << endl;
 	  cin.get(resp, 10);
 	  cin.clear();
 	  cin.ignore(10000, '\n');
 	  if (strcmp(resp, "search") == 0) {
-	    
+	    int val;
+	    cout << ">Search value: ";
+	    cin >> val;
+	    cin.clear();
+	    cin.ignore(10000, '\n');
+	    Node* temp = search(head, val);
+	    if (temp != NULL) {
+	      cout << endl << val << " is part of the tree." << endl;
+	    } else {
+	      cout << endl << val << " is NOT in the tree." << endl;
+	    }
 	  } else if (strcmp(resp, "remove") == 0) {
-	    
+	    int val;
+	    cout << ">Remove value: ";
+	    cin >> val;
+	    cin.clear();
+	    cin.ignore(10000, '\n');
+	    //head = remove(head, val);
+	    cout << endl << val << " has been removed:" << endl;
+	    cout << endl;
+	    printTree(head, NULL, false);
+	    cout << endl;
+	  } else if (strcmp(resp, "add") == 0) {
+	    int val;
+	    cout << ">Add value: ";
+	    cin >> val;
+	    cin.clear();
+	    cin.ignore(10000, '\n');
+	    Node* curr = head;
+	    Node* prev = NULL;
+	    insert(head, curr, prev, val);
+	    cout << endl << val << " has been added:" << endl;
+	    cout << endl;
+	    printTree(head, NULL, false);
+	    cout << endl;
 	  } else if (strcmp(resp, "done") == 0) {
-	    cout << endl << "Discarded current heap." << endl;
+	    cout << "=========================" << endl;
+	    cout << "Discarded current tree." << endl;
 	    r = false;
 	    cout << "=========================" << endl;
 	  } else {
@@ -201,7 +232,7 @@ void parse(char* in, int* modif, int &count) {
   } 
 }
 
-//insert function
+//insert function adds nodes with values recursively to tree
 void insert(Node* &head, Node* &curr, Node*& prev, int val) {
   if (head == NULL) {
     head = new Node();
@@ -232,34 +263,54 @@ void insert(Node* &head, Node* &curr, Node*& prev, int val) {
   }
 }
 
-//https://www.techiedelight.com/c-program-print-binary-tree/
-// Recursive function to print binary tree
-// It uses inorder traversal
-void printTree(Node *root, Trunk *prev, bool isLeft) {
-  char prev_str[10];
-  strcpy(prev_str, "    ");
+
+//print functions with help from //www.techiedelight.com/c-program-print-binary-tree
+void printTree(Node* root, Trunk *prev, bool isLeft) {
+  if (root == NULL) {
+    return;
+  }
+  char* prev_str = (char*)("    ");
   Trunk *trunk = new Trunk(prev, prev_str);
-    
   printTree(root->getLeft(), trunk, true);
-  
   if (!prev) {
-    strcpy(trunk->str, "---");
+    trunk -> str = (char*)("---");
   }
   else if (isLeft) {
-    strcpy(trunk->str, ".---");
-    strcpy(prev_str, "   |");
+    trunk -> str = (char*)(".---");
+    prev_str = (char*)("   |");
   }
   else {
-    strcpy(trunk->str, "`---");
-    strcpy(prev_str, prev->str);
+    trunk -> str = (char*)("`---");
+    prev -> str = prev_str;
   }
   showTrunks(trunk);
   cout << *root->getData() << endl;
-  
+
   if (prev) {
-    strcpy(prev_str, prev->str);
+    prev -> str = prev_str;
   }
-  strcpy(trunk->str, "   |");
-  
+  trunk -> str = (char*)("   |");
   printTree(root->getRight(), trunk, false);
 }
+
+//search function returns node with inputted value
+Node* search(Node* curr, int val) {
+  if (val == *curr->getData()) {
+    return curr;
+  }
+  else if (val < *curr->getData()) {  //lower goes left
+    if (curr->getLeft() != NULL) {
+      search(curr->getLeft(), val);  //recursion
+    } else {
+      return NULL;  //no lower node
+    }
+  } else {  //higher goes right
+    if (curr->getRight() != NULL) {
+      search(curr->getRight(), val);  //resursion
+    } else {
+      return NULL;  //no higher node
+    }
+  } 
+}
+
+

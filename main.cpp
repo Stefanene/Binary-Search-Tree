@@ -89,9 +89,10 @@ int main() {
 	  for (int i = 0; i < 100; i++) {
 	    if (modif[i] != 0) {
 	    cout << modif[i] << " ";
+	    siz++;
 	    }
 	  }
-	  cout << endl;
+	  cout << endl << "Size: " << siz << endl;;
 	}
       }
       else if (strcmp(inp, "type") == 0) {
@@ -266,7 +267,7 @@ void insert(Node* &head, Node* &curr, Node*& prev, int val) {
 }
 
 
-//print functions with help from //www.techiedelight.com/c-program-print-binary-tree and Omar for strings to char*
+//print functions with help from //www.techiedelight.com/c-program-print-binary-tree
 void printTree(Node* root, Trunk *prev, bool isLeft) {
   if (root == NULL) {
     return;

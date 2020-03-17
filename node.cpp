@@ -8,7 +8,8 @@ using namespace std;
 Node::Node() {
   //constructor
   data = 0;
-  right = left = NULL;
+  left = NULL;
+  right = NULL;
 }
 
 Node::~Node() {
@@ -27,8 +28,8 @@ Node* Node::getRight() {
   return right;
 }
 
-int* Node::getData() {
-  return &data;
+int Node::getData() {
+  return data;
 }
 
 //setters

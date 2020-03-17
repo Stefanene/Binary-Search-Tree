@@ -10,7 +10,7 @@ class Node {
   //getters
   Node* getLeft();
   Node* getRight();
-  int* getData();
+  int getData();
   //setters
   void setLeft(Node*);
   void setRight(Node*);

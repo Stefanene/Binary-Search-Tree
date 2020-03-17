@@ -3,7 +3,7 @@
      Reused input and parse method from my previous Heap code
      Visual tree printing from //www.techiedelight.com/c-program-print-binary-tree/
        ^ includes Trunk struct and showTrunk function
-     Remove function references from www.geeksforgeeks.org/binary-search-tree-set-2-delete/
+     Remove references from video at https://www.youtube.com/watch?v=gcULXE7ViZw by mycodeschool
 */
 
 #include <iostream>
@@ -39,8 +39,8 @@ void showTrunks(Trunk *p) {//helper method for printing
 void parse(char* in, int* modif, int &count);
 void insert(Node* &head, Node* &curr, Node* &prev, int val);
 void printTree(Node* root, Trunk *prev, bool isLeft);
-Node* search (Node* curr, int val);
-Node* remove (Node* &root, int k);
+Node* search(Node* curr, int val);
+Node* remove(Node* &head, int val);
 
 int main() {
   //variables
@@ -50,17 +50,14 @@ int main() {
   int count = 0;  //number of chars
   int modif[100];
   int siz = 0; //for modif array size
-  for (int i = 0; i < 100; i++) {
-    modif[i] = 0;  //clear int array
-  }
   //program
   cout << "=========================" << endl;
   cout << "Welcome to my Binary Search Tree program." << endl;
   bool run = true;
   while (run) {
-    for (int c = 0; c < 100; c++) {
-      modif[c] = 0; //clear array
-    }
+    memset(input, 0, 10000);
+    memset(modif, 0, 100);
+    siz = 0;
     count = 0;  //clear array size index
     cout << endl << "You can: tree, quit." << endl;
     cin.get(inp, 10);
@@ -90,8 +87,9 @@ int main() {
 	  parse(input, modif, count);  //parse input to modif array
 	  cout << "IN: ";
 	  for (int i = 0; i < 100; i++) {
-	    if (modif[i] == 0) break;
+	    if (modif[i] != 0) {
 	    cout << modif[i] << " ";
+	    }
 	  }
 	  cout << endl;
 	}
@@ -107,9 +105,10 @@ int main() {
 	parse(in, modif, count);  //parse input to modif array
 	cout << ">> IN: ";
 	for (int i = 0; i < 100; i++) {
-	  if (modif[i] == 0) break;
-	  cout << modif[i] << " ";
-	  siz++;
+	  if (modif[i] != 0) {
+	    cout << modif[i] << " ";
+	    siz++;
+	  }
 	}
 	cout << endl << " Size: " << siz << endl;      
       }
@@ -123,9 +122,10 @@ int main() {
 	Node* curr = NULL;  //current node
 	Node* prev = NULL;  //previous node
 	for (int i = 0; i < siz; i++) {
-	  curr = head;
-	  insert(head, curr, prev, modif[i]);
-	  cout << modif[i] << endl;
+	  if (modif[i] != 0) {
+	    curr = head;
+	    insert(head, curr, prev, modif[i]);
+	  }
 	}
 	cout << "========Tree=Built=======" << endl;
 	// print constructed binary tree
@@ -159,7 +159,6 @@ int main() {
 	    cin.clear();
 	    cin.ignore(10000, '\n');
 	    head = remove(head, val);
-	    cout << endl << val << " has been removed:" << endl;
 	    cout << endl;
 	    printTree(head, NULL, false);
 	    cout << endl;
@@ -169,8 +168,9 @@ int main() {
 	    cin >> val;
 	    cin.clear();
 	    cin.ignore(10000, '\n');
-	    Node* curr = head;
+	    Node* curr = NULL;
 	    Node* prev = NULL;
+	    curr = head;
 	    insert(head, curr, prev, val);
 	    cout << endl << val << " has been added:" << endl;
 	    cout << endl;
@@ -237,25 +237,27 @@ void insert(Node* &head, Node* &curr, Node*& prev, int val) {
   if (head == NULL) {
     head = new Node();
     head->setData(val);
+    return;
   } else {
-    if (val <= *curr->getData()) {  //lower goes left
+    if (val < curr->getData()) {  //lower goes left
       prev = curr;
       curr = curr->getLeft();
       if (curr == NULL) {  //if empty then insert
 	curr = new Node();
 	curr->setData(val);
 	prev->setLeft(curr);
+	return;
       } else {  //if !empty then keep going
 	insert(head, curr, prev, val);
       }
-    }
-    else {
+    } else {
       prev = curr;
       curr = curr->getRight();  //higer goes right
       if (curr == NULL) {  //if empty then inset
 	curr = new Node();
 	curr->setData(val);
 	prev->setRight(curr);
+	return;
       } else {  //if !empty then keep going
 	insert(head, curr, prev, val);
       }
@@ -284,7 +286,7 @@ void printTree(Node* root, Trunk *prev, bool isLeft) {
     prev -> str = prev_str;
   }
   showTrunks(trunk);
-  cout << *root->getData() << endl;
+  cout << root->getData() << endl;
 
   if (prev) {
     prev -> str = prev_str;
@@ -295,10 +297,10 @@ void printTree(Node* root, Trunk *prev, bool isLeft) {
 
 //search function returns node with inputted value
 Node* search(Node* curr, int val) {
-  if (val == *curr->getData()) {
+  if (val == curr->getData()) {
     return curr;
   }
-  else if (val < *curr->getData()) {  //lower goes left
+  else if (val < curr->getData()) {  //lower goes left
     if (curr->getLeft() != NULL) {
       search(curr->getLeft(), val);  //recursion
     } else {
@@ -306,62 +308,49 @@ Node* search(Node* curr, int val) {
     }
   } else {  //higher goes right
     if (curr->getRight() != NULL) {
-      search(curr->getRight(), val);  //resursion
+      search(curr->getRight(), val);  //recursion
     } else {
       return NULL;  //no higher node
     }
   } 
 }
 
-//remove function with help from //www.geeksforgeeks.org/binary-search-tree-set-2-delete/
-Node* remove(Node* &root, int k) {  
-  if (root == NULL) {  //base case
-    return root; 
+//remove function with help from youtube video by "mycodeschool"
+Node* remove(Node* &root, int val) {
+  Node* L = root->getLeft();
+  Node* R = root->getRight();
+  if(root == NULL) return root;
+  else if(val < root->getData()) root->setLeft(remove(L, val));
+  else if(val > root->getData()) root->setRight(remove(R, val));
+  else {  //root is the node to be deleted
+    if (root->getRight() == NULL && root->getLeft() == NULL) {  //if no child
+      root->~Node();
+      root = NULL;
+      return root;
+    }
+    //if one child exists
+    else if (root->getLeft() == NULL) {  //right child exists
+      Node* temp = root;
+      root = root->getRight();
+      temp->~Node();
+      return root;
+    }
+    else if (root->getRight() == NULL) {  //left child exists
+      Node* temp = root;
+      root = root->getLeft();
+      temp->~Node();
+      return root;
+    }
+    //if 2 children exists
+    else {
+      //find min on right
+      Node* temp = root->getRight();
+      while (temp->getLeft() != NULL) temp = temp->getLeft();
+      //now continue deletion/replacement
+      root->setData(temp->getData());
+      Node* r = root->getRight();
+      root->setRight(remove(r, temp->getData()));
+    }
   }
-  //recursive calls
-  if (*root->getData() > k) {
-    Node* l = root->getLeft();
-    root->setLeft(remove(l, k)); 
-    return root; 
-  } 
-  else if (*root->getData() < k) {
-    Node* r = root->getRight();
-    root->setRight(remove(r, k)); 
-    return root; 
-  }
-  //if one child is empty
-  if (root->getLeft() == NULL) {  //left null, go right
-    Node* temp = root->getRight(); 
-    root->~Node();  //delete root
-    root = NULL;
-    return temp; 
-  } 
-  else if (root->getRight() == NULL) {  //right null, go left
-    Node* temp = root->getLeft(); 
-    root->~Node();  //delete root
-    root = NULL;
-    return temp; 
-  } 
-  //if both children exist 
-  else { 
-    Node* succParent = root->getRight(); 
-    
-    // Find successor 
-    Node *succ = root->getRight(); 
-    while (succ->getLeft() != NULL) { 
-      succParent = succ; 
-      succ = succ->getLeft(); 
-    } 
-    
-    //successors right child becomes parent's left child 
-    succParent->setLeft(succ->getRight()); 
-    
-    //copy successor data to root 
-    root->setData(*succ->getData()); 
-    
-    //delete Successor and return root
-    succ->~Node();
-    succ = NULL;
-    return root; 
-  } 
-} 
+  return root;
+}

@@ -266,7 +266,7 @@ void insert(Node* &head, Node* &curr, Node*& prev, int val) {
 }
 
 
-//print functions with help from //www.techiedelight.com/c-program-print-binary-tree
+//print functions with help from //www.techiedelight.com/c-program-print-binary-tree and Omar for strings to char*
 void printTree(Node* root, Trunk *prev, bool isLeft) {
   if (root == NULL) {
     return;
